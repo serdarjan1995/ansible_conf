@@ -1,0 +1,116 @@
+---
+- name: Run apt-get update
+  become: yes
+  become_method: sudo
+  apt:
+    update_cache: yes
+
+- name: Install a list of packages
+  become: yes
+  become_method: sudo
+  apt:
+    name: "{{ packages }}"
+
+- name: Installing pip3 virtualenv
+  pip:
+    name:
+      - virtualenv
+      - setuptools
+    executable: pip3
+
+- name: Reboot the machine
+  become: yes
+  become_method: sudo
+  reboot:
+
+- name: Create nologin user 'bot'
+  become: yes
+  become_method: sudo
+  shell: adduser --disabled-login --gecos 'bot' bot
+
+- name: Create logs directory /home/bot/logs
+  become: yes
+  become_user: bot
+  file:
+    path: /home/bot/logs
+    state: directory
+
+- name: Clone git repo
+  become: yes
+  become_user: bot
+  git:
+    repo: "{{ repository }}"
+    dest: /home/bot/app
+
+- name: Download Jmeter
+  become: yes
+  become_user: bot
+  get_url:
+    url: "{{ jmeter_url }}"
+    dest: /home/bot/apache-jmeter-5.0.tgz
+
+- name: Extract apache-jmeter-5.0.tgz
+  become: yes
+  become_user: bot
+  unarchive:
+    src: /home/bot/apache-jmeter-5.0.tgz
+    dest: /home/bot/
+    remote_src: yes
+
+- name: Rename apache-jmeter-5.0 -> jmeter
+  become: yes
+  become_user: bot
+  command: mv /home/bot/apache-jmeter-5.0 /home/bot/jmeter
+
+- name: Create virtualenv
+  become: yes
+  become_user: sudo
+  command: virtualenv /home/bot/env -p python3.6
+
+- name: Install requirements on virtualenv
+  become: yes
+  become_user: bot
+  pip: 
+    requirements=/home/bot/app/requirements.txt 
+    virtualenv=/home/bot/env
+
+- name: Remove nginx default site
+  become: yes
+  become_method: sudo
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Copy nginx conf file
+  become: yes
+  become_method: sudo
+  template:
+    src: nginx_bot.j2
+    dest: /etc/nginx/sites-available/bot
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create symlink nginx
+  become: yes
+  become_method: sudo
+  file:
+    src: /etc/nginx/sites-available/bot
+    dest: /etc/nginx/sites-enabled/bot
+    state: link
+  notify:
+    - Restart Nginx
+
+- name: Copy supervisor conf file
+  become: yes
+  become_method: sudo
+  template:
+    src: supervisor_bot.conf.j2
+    dest: /etc/supervisor/conf.d/bot.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Reread Supervisor
+    - Update Supervisor
+

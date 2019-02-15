@@ -1,0 +1,16 @@
+---
+packages:
+    - python3-pip
+    - python3-dev
+    - nginx
+    - supervisor
+    - mongodb
+    - git
+    - hping3
+    - scapy
+    - default-jre
+    - cpulimit
+
+repository: https://serdar:s3rd4r95@gel.invictuseurope.com/serdar/ddos-attack-simulation-bot
+jmeter_url: http://ftp.itu.edu.tr/Mirror/Apache//jmeter/binaries/apache-jmeter-5.0.tgz
+

@@ -1,0 +1,24 @@
+---
+- name: Start Nginx
+  become: true
+  service:
+    name: nginx
+    state: started
+
+- name: Restart Nginx
+  become: true
+  service:
+    name: nginx
+    state: restarted
+
+- name: Reread Supervisor
+  become: true
+  supervisorctl:
+    name: bot
+    state: present
+
+- name: Update Supervisor
+  become: true
+  supervisorctl:
+    name: bot
+    state: restarted

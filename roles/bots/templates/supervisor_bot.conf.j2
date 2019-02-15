@@ -1,0 +1,10 @@
+[program:bot]
+command=/home/bot/env/bin/uwsgi --module wsgi:application --master --pidfile /tmp/project-bot.pid --post-buffering 65536 --buffer-size  32768  --http 127.0.0.1:8080  --processes 1 --threads 5   --harakiri 60    --max-requests 5000   --vacuum
+directory=/home/bot/app
+user=root
+stderr_logfile=/home/bot/logs/bot_err.log
+stdout_logfile =/home/bot/logs/bot_out.log
+autostart=true
+autorestart=true
+stopsignal=KILL
+stopasgroup=true

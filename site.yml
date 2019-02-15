@@ -1,0 +1,8 @@
+---
+# This playbook deploys the whole application stack in this site.
+
+- name: Install packages
+  hosts: bots
+  remote_user: user
+  roles:
+    - bots
